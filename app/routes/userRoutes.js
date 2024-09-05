@@ -208,81 +208,81 @@ router.post("/getMyCardsLinkSetting", async (req, res, next) => {
   }
 });
 
-// router.post("/addNotificationGroup", async function (req, res, next) {
-//   try {
-//     let group = mongooseConnections.model("contactGroup", groupSchema);
+router.post("/addNotificationGroup", async function (req, res, next) {
+  try {
+    let group = mongooseConnections.model("contactGroup", groupSchema);
 
-//     let srno = await group.find({}).sort({ srNo: -1 }).limit(1);
-//     let srNoo = srno[0]?.srNo || 1;
+    let srno = await group.find({}).sort({ srNo: -1 }).limit(1);
+    let srNoo = srno[0]?.srNo || 1;
 
-//     const resData = await commonJs.fileUpload(req, res);
-//     var groupObj = JSON.parse(req.body.data);
+    const resData = await commonJs.fileUpload(req, res);
+    var groupObj = JSON.parse(req.body.data);
 
-//     if (!Array.isArray(groupObj.mobiles)) {
-//       res.status(400).send({
-//         status: "error",
-//         message: "Mobile must be an array of numbers.",
-//       });
-//       return;
-//     }
+    if (!Array.isArray(groupObj.mobiles)) {
+      res.status(400).send({
+        status: "error",
+        message: "Mobile must be an array of numbers.",
+      });
+      return;
+    }
 
-//     // Assign a default name ("x") to mobile numbers from notificationObj
-//     var mobilesFromObj = groupObj.mobiles.map((mobile) => ({
-//       mobile: mobile.mobile,
-//       name: mobile.name || "x",
-//     }));
+    // Assign a default name ("x") to mobile numbers from notificationObj
+    var mobilesFromObj = groupObj.mobiles.map((mobile) => ({
+      mobile: mobile.mobile,
+      name: mobile.name || "x",
+    }));
 
-//     var csvMobiles = [];
-//     if (resData.filePath && resData.buffer) {
-//       try {
-//         const csvData = await csv().fromString(resData.buffer.toString());
-//         console.log("Parsed CSV Data:", csvData);
+    var csvMobiles = [];
+    if (resData.filePath && resData.buffer) {
+      try {
+        const csvData = await csv().fromString(resData.buffer.toString());
+        console.log("Parsed CSV Data:", csvData);
 
-//         // Extract mobileNumbers and names from CSV
-//         csvMobiles = csvData.map((row) => ({
-//           mobile: row.mobileNumbers.trim(),
-//           name: row.name || "x",
-//         }));
-//       } catch (error) {
-//         console.error("Error parsing CSV:", error.message);
-//         res.status(400).send({
-//           status: "error",
-//           message: "Error parsing CSV.",
-//         });
-//         return;
-//       }
-//     }
+        // Extract mobileNumbers and names from CSV
+        csvMobiles = csvData.map((row) => ({
+          mobile: row.mobileNumbers.trim(),
+          name: row.name || "x",
+        }));
+      } catch (error) {
+        console.error("Error parsing CSV:", error.message);
+        res.status(400).send({
+          status: "error",
+          message: "Error parsing CSV.",
+        });
+        return;
+      }
+    }
 
-//     // Combine phone numbers from JSON and CSV
-//     var allMobileNumbers = [...mobilesFromObj, ...csvMobiles];
+    // Combine phone numbers from JSON and CSV
+    var allMobileNumbers = [...mobilesFromObj, ...csvMobiles];
 
-//     var groups = {
-//       mobiles: allMobileNumbers,
-//       groupName: groupObj.groupName,
-//       displayName: groupObj.displayName,
-//       userId: new mongoose.Types.ObjectId(groupObj.userId),
-//       srNo: srNoo + 1,
-//       message: groupObj.message,
-//     };
+    var groups = {
+      mobiles: allMobileNumbers,
+      groupName: groupObj.groupName,
+      displayName: groupObj.displayName,
+      userId: new mongoose.Types.ObjectId(groupObj.userId),
+      srNo: srNoo + 1,
+      message: groupObj.message,
+    };
 
-//     // Save the group
-//     let newgroup = new group(groups);
-//     createUpdateDate(newgroup);
-//     await newgroup.save();
+    // Save the group
+    let newgroup = new group(groups);
+    createUpdateDate(newgroup);
+    await newgroup.save();
 
-//     res.status(200).send({
-//       status: "success",
-//       message: "Group Created!",
-//       data: groups,
-//     });
-//   } catch (err) {
-//     console.error("Error in file upload processing:", err.message);
-//     res.status(500).send({
-//       status: "error",
-//       message: "Internal server error.",
-//     });
-//   }
-// });
+    res.status(200).send({
+      status: "success",
+      message: "Group Created!",
+      data: groups,
+    });
+  } catch (err) {
+    console.error("Error in file upload processing:", err.message);
+    res.status(500).send({
+      status: "error",
+      message: "Internal server error.",
+    });
+  }
+});
 
 // Export the router
 module.exports = router;
