@@ -76,7 +76,6 @@ router.post("/getMyCardsLinkSetting", async (req, res, next) => {
         $addFields: {
           cardId: {
             $toObjectId: cardId,
-            //$toCardId: userId
           },
         },
       },
@@ -121,7 +120,6 @@ router.post("/getMyCardsLinkSetting", async (req, res, next) => {
                         { $ne: ["$links.desc", ""] },
                         { $ne: ["$links.desc", null] },
                         { $ifNull: ["$links.desc", false] },
-                        //{ ifNull: ["links.name", undefined]}
                       ],
                     },
                     then: "$links.desc",
