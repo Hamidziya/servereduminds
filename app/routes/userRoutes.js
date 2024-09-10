@@ -91,7 +91,6 @@ router.post("/getMyCardsLinkSetting", async (req, res, next) => {
               $match: {
                 $expr: {
                   $eq: ["$_id", "$$id"],
-                 // $eq: ["$userId", "$$cardId"],
 
                 },
                 isActive: true,
@@ -135,7 +134,6 @@ router.post("/getMyCardsLinkSetting", async (req, res, next) => {
                 startwith: "$links.startwith",
                 url: "$links.url",
                 isShow: "$links.isShow",
-                //isDelete:"$links.isDelete"
               },
             },
           ],
@@ -152,7 +150,6 @@ router.post("/getMyCardsLinkSetting", async (req, res, next) => {
           _id: "$groupName",
           groupName: {
             $first: "$groupName",
-            //$first:"displayName"
           },
           groupId: {
             $first: "$_id",
@@ -175,7 +172,6 @@ router.post("/getMyCardsLinkSetting", async (req, res, next) => {
                       { $ne: ["$desc", ""] },
                       { $ne: ["$desc", null] },
                       { $ifNull: ["$desc", false] },
-                      //{ $ifNull: ["$desc", true]}
                     ],
                   },
                   then: "$desc",
