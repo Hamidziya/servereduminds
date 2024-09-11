@@ -10,7 +10,7 @@ const router = express.Router();
 router.get('/users', async (req, res) => {
   try {
     console.log("Fetching users from MongoDB...");
-    const users = await User.find({name:"Test User"});
+    const users = await User.find({isDelete:false});
     console.log("Users found:", users);
     res.json(users);
   } catch (err) {
@@ -18,6 +18,76 @@ router.get('/users', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+router.post('/userSignUp', async (req, res) => {
+  try {
+    let toSave = req.body; 
+    
+    const newUser = new User(toSave);
+
+    const savedUser = await newUser.save();
+
+    res.status(201).json(savedUser);
+  } catch (err) {
+    console.error('Error saving user:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.post("/updateUserDetails", async (req, res, next) => {
+  try {
+
+    let toUpdate = req.body;
+    await User.updateOne(
+      {
+        _id: req.body.cardId,
+      },
+      {
+        $set: toUpdate
+      },
+      {
+        $upsert: true,
+        $multi: true,
+      }
+    );
+
+    res.status(200).send({
+      status: "success",
+      message: "user updated successFully!",
+    });
+  } catch (err) {
+    next(err, req, res, next);
+  }
+});
+
+router.post("/deleteUser", async (req, res, next) => {
+  try {
+
+    await User.updateOne(
+      {
+        _id: req.body.cardId,
+      },
+      {
+        $set: {
+          isDelete: true,
+        },
+      },
+      {
+        $upsert: true,
+        $multi: true,
+      }
+    );
+
+    res.send({
+      status: "success",
+      message: "updated successFully!",
+    });
+  } catch (err) {
+    next(err, req, res, next);
+  }
+});
+
+
 
 router.post("/changeIsShowApp", async (req, res, next) => {
   try {
@@ -29,23 +99,23 @@ router.post("/changeIsShowApp", async (req, res, next) => {
     } else {
       toUpdate = false;
     }
-    await User.updateOne(
-      {
-        _id: req.body.cardId,
-        "links.id": {
-          $eq: new mongoose.Types.ObjectId(req.body.id),
-        },
-      },
-      {
-        $set: {
-          "links.$.isShow": toUpdate,
-        },
-      },
-      {
-        $upsert: true,
-        $multi: true,
-      }
-    );
+    // await User.updateOne(
+    //   {
+    //     _id: req.body.cardId,
+    //     "links.id": {
+    //       $eq: new mongoose.Types.ObjectId(req.body.id),
+    //     },
+    //   },
+    //   {
+    //     $set: {
+    //       "links.$.isShow": toUpdate,
+    //     },
+    //   },
+    //   {
+    //     $upsert: true,
+    //     $multi: true,
+    //   }
+    // );
 
     res.send({
       status: "success",
