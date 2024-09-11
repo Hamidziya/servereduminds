@@ -87,6 +87,30 @@ router.post("/deleteUser", async (req, res, next) => {
   }
 });
 
+router.post("/userLogin", async (req, res, next) => {
+  try {
+    try {
+      //console.log("Fetching users from MongoDB...");
+      const users = await User.find({isDelete:false,
+        _id:req.body.userId
+      });
+      //console.log("Users found:", users);
+
+      res.status(500).send({
+        status: "success",
+        message: "Login Data!",
+        data:users
+      });
+        } catch (err) {
+      console.error('Error fetching users:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+  } catch (err) {
+    next(err, req, res, next);
+  }
+});
+
 
 
 router.post("/changeIsShowApp", async (req, res, next) => {
