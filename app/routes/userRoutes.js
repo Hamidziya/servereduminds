@@ -53,7 +53,7 @@ router.post("/updateUserDetails", async (req, res, next) => {
 
     res.status(200).send({
       status: "success",
-      message: "user updated successFully!",
+      message: "user updated successfully!",
     });
   } catch (err) {
     next(err, req, res, next);
@@ -96,7 +96,7 @@ router.post("/userLogin", async (req, res, next) => {
       });
       //console.log("Users found:", users);
 
-      res.status(500).send({
+      res.status(200).send({
         status: "success",
         message: "Login Data!",
         data:users
