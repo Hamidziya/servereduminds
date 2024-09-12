@@ -327,6 +327,45 @@ router.post("/newLinkSettingData", async (req, res, next) => {
   }
 });
 
+router.post("/updateAppCredentials", async (req, res, next) => {
+  try {
+    let user = mongooseConnections.model("mycarduser", userSchema);
+    let isPro = req.body.isPro;
+    let toUpdate;
+    if (isPro == false) {
+      toUpdate = true;
+    } else {
+      toUpdate = false;
+    }
+    await User.updateOne(
+      {
+        _id: req.body.cardId,
+        userId: req.body.userId,
+        "links.linkId": {
+          $eq: new mongoose.Types.ObjectId(req.body.id),
+        },
+      },
+      {
+        $set: {
+          "links.$.isPro": toUpdate,
+        },
+      },
+      {
+        $upsert: true,
+        $multi: true,
+      }
+    );
+
+    res.send({
+      status: "success",
+      message: "Link updated successFully!",
+    });
+  } catch (err) {
+    next(err, req, res, next);
+  }
+});
+
+
 router.post("/changeIsShowApp", async (req, res, next) => {
   try {
     let mycard = mongooseConnections.model("mycards", mycardSchema);
@@ -363,7 +402,6 @@ router.post("/changeIsShowApp", async (req, res, next) => {
     next(err, req, res, next);
   }
 });
-
 
 router.post("/getMyCardsLinkSetting", async (req, res, next) => {
   try {

@@ -3,12 +3,12 @@
 const mongoose = require('mongoose');
 
 // MongoDB connection URL
-const mongoURL = 'mongodb://127.0.0.1:27017/local'; // Replace 'mydatabase' with your actual database name
+const mongoURL = 'mongodb://127.0.0.1:27017/local';
 
 // Function to connect to MongoDB
 const connectDB = async () => {
   try {
-   let dbe = await mongoose.connect(mongoURL, {
+    let dbe = await mongoose.connect(mongoURL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -34,5 +34,4 @@ const connectDB = async () => {
   }
 };
 
-// Export the connection function
 module.exports = connectDB;
