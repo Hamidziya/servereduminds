@@ -178,7 +178,7 @@ router.post("/newUserUpdate", async (req, res, next) => {
 
 router.post("/changeIsShowApp", async (req, res, next) => {
   try {
-    //let mycard = mongooseConnections.model("mycards", mycardSchema);
+    let mycard = mongooseConnections.model("mycards", mycardSchema);
     let isShow = req.body.isShow;
     let toUpdate;
     if (isShow == false) {
@@ -186,23 +186,23 @@ router.post("/changeIsShowApp", async (req, res, next) => {
     } else {
       toUpdate = false;
     }
-    // await User.updateOne(
-    //   {
-    //     _id: req.body.cardId,
-    //     "links.id": {
-    //       $eq: new mongoose.Types.ObjectId(req.body.id),
-    //     },
-    //   },
-    //   {
-    //     $set: {
-    //       "links.$.isShow": toUpdate,
-    //     },
-    //   },
-    //   {
-    //     $upsert: true,
-    //     $multi: true,
-    //   }
-    // );
+    await User.updateOne(
+      {
+        _id: req.body.cardId,
+        "links.id": {
+          $eq: new mongoose.Types.ObjectId(req.body.id),
+        },
+      },
+      {
+        $set: {
+          "links.$.isShow": toUpdate,
+        },
+      },
+      {
+        $upsert: true,
+        $multi: true,
+      }
+    );
 
     res.send({
       status: "success",
