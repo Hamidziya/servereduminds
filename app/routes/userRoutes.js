@@ -111,7 +111,34 @@ router.post("/userLogin", async (req, res, next) => {
   }
 });
 
+router.post("/email-login", async (req, res, next) => {
+  try {
+    try {
 
+      let toSave = req.body; 
+      const newUser = new User(toSave);
+      const savedUser = await newUser.save();
+  
+      //res.status(201).json(savedUser);
+
+      const users = await User.find({isDelete:false,
+        _id:savedUser._id
+      });
+
+      res.status(200).send({
+        status: "success",
+        message: "Email Login Data!",
+        data:users
+      });
+        } catch (err) {
+      console.error('Error fetching users:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+  } catch (err) {
+    next(err, req, res, next);
+  }
+});
 
 router.post("/changeIsShowApp", async (req, res, next) => {
   try {
