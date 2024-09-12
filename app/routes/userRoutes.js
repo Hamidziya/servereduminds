@@ -10,7 +10,7 @@ const router = express.Router();
 router.get('/users', async (req, res) => {
   try {
     console.log("Fetching users from MongoDB...");
-    const users = await User.find({isDelete:false});
+    const users = await User.find({ isDelete: false });
     console.log("Users found:", users);
     res.json(users);
   } catch (err) {
@@ -21,8 +21,8 @@ router.get('/users', async (req, res) => {
 
 router.post('/userSignUp', async (req, res) => {
   try {
-    let toSave = req.body; 
-    
+    let toSave = req.body;
+
     const newUser = new User(toSave);
 
     const savedUser = await newUser.save();
@@ -90,17 +90,18 @@ router.post("/deleteUser", async (req, res, next) => {
 router.post("/userLogin", async (req, res, next) => {
   try {
     try {
-      const users = await User.find({isDelete:false,
-        _id:req.body.userId
+      const users = await User.find({
+        isDelete: false,
+        _id: req.body.userId
       });
       //console.log("Users found:", users);
 
       res.status(200).send({
         status: "success",
         message: "Login Data!",
-        data:users
+        data: users
       });
-        } catch (err) {
+    } catch (err) {
       console.error('Error fetching users:', err);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -114,22 +115,23 @@ router.post("/email-login", async (req, res, next) => {
   try {
     try {
 
-      let toSave = req.body; 
+      let toSave = req.body;
       const newUser = new User(toSave);
       const savedUser = await newUser.save();
-  
+
       //res.status(201).json(savedUser);
 
-      const users = await User.find({isDelete:false,
-        _id:savedUser._id
+      const users = await User.find({
+        isDelete: false,
+        _id: savedUser._id
       });
 
       res.status(200).send({
         status: "success",
         message: "Email Login Data!",
-        data:users
+        data: users
       });
-        } catch (err) {
+    } catch (err) {
       console.error('Error fetching users:', err);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -140,7 +142,7 @@ router.post("/email-login", async (req, res, next) => {
 });
 router.post("/newUserUpdate", async (req, res, next) => {
   try {
-    let user = mongooseConnections.model("eduUsers",usersSchema)
+    let user = mongooseConnections.model("eduUsers", usersSchema)
 
     let isPro = req.body.isPro;
     let toUpdate;
@@ -173,6 +175,155 @@ router.post("/newUserUpdate", async (req, res, next) => {
     });
   } catch (err) {
     next(err, req, res, next);
+  }
+});
+
+
+router.post("/newLinkSettingData", async (req, res, next) => {
+  try {
+    let cardSetting = mongooseConnections.model(
+      "mycardsLinkSettings",
+      mycardsLinkSettingSchema
+    );
+    let cardId = req.body.cardId;
+    const agg = [
+      {
+        $match: {
+          isActive: true,
+          isDelete: false,
+          isAdmin: false,
+        },
+      },
+      {
+        $addFields: {
+          cardId: {
+            $toObjectId: cardId
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: "mycards",
+          let: {
+            id: "$cardId",
+            name: "$name",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$_id", "$$id"],
+
+                },
+                isActive: true,
+              },
+            },
+            {
+              $unwind: {
+                path: "$links",
+              },
+            },
+            {
+              $match: {
+                $expr: {
+                  $eq: ["$links.name", "$$name"],
+                },
+              },
+            },
+            {
+              $project: {
+                linkId: "$links.id",
+                groupName: "$links.groupName",
+                name: "$links.name",
+                value: "$links.value",
+                desc: {
+                  $cond: {
+                    if: {
+                      $and: [
+                        { $ne: ["$links.desc", ""] },
+                        { $ne: ["$links.desc", null] },
+                        { $ifNull: ["$links.desc", false] },
+                      ],
+                    },
+                    then: "$links.desc",
+                    else: "Connect To Knowwu",
+                  },
+                },
+                tagline: "$links.tagline",
+                ispro: "$links.ispro",
+                placeholder: "$links.placeholder",
+                defaulturl: "$links.defaulturl",
+                startwith: "$links.startwith",
+                url: "$links.url",
+                isShow: "$links.isShow",
+              },
+            },
+          ],
+          as: "LinkData",
+        },
+      },
+      {
+        $sort: {
+          orderBy: 1,
+        },
+      },
+      {
+        $group: {
+          _id: "$groupName",
+          groupName: {
+            $first: "$groupName",
+          },
+          groupId: {
+            $first: "$_id",
+          },
+          childdata: {
+            $push: {
+              id: "$_id",
+              name: "$name",
+              displayName: "$displayName",
+              icon: "$icon",
+              orderBy: "$orderBy",
+              ispro: "$ispro",
+              placeholder: "$placeholder",
+              defaulturl: "$defaulturl",
+              startwith: "$startwith",
+              desc: {
+                $cond: {
+                  if: {
+                    $and: [
+                      { $ne: ["$desc", ""] },
+                      { $ne: ["$desc", null] },
+                      { $ifNull: ["$desc", false] },
+                    ],
+                  },
+                  then: "$desc",
+                  else: "Connect To Knowwu",
+                },
+              },
+              tagline: "$tagline",
+              isShow: "$isShow",
+              linkData: "$LinkData",
+            },
+          },
+        },
+      },
+      {
+        $sort: {
+          groupId: 1,
+        },
+      },
+    ];
+
+    let result = await cardSetting.aggregate(agg);
+    if (result != null) {
+      res.status(200).send({
+        message: "Link Data",
+        status: "success",
+        data: result,
+      });
+    }
+  } catch (err) {
+    console.log(err);
   }
 });
 
