@@ -116,6 +116,20 @@ router.post("/email-login", async (req, res, next) => {
     try {
 
       let toSave = req.body;
+
+      const exist = await User.find({
+        isDelete: false,
+        email: toSave.email
+      });
+
+      if (exist) {
+        res.status(201).send({
+          status: "error",
+          message: "Email Already Exists!",
+        })
+        return
+      }
+
       const newUser = new User(toSave);
       const savedUser = await newUser.save();
 
