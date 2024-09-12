@@ -90,7 +90,6 @@ router.post("/deleteUser", async (req, res, next) => {
 router.post("/userLogin", async (req, res, next) => {
   try {
     try {
-      //console.log("Fetching users from MongoDB...");
       const users = await User.find({isDelete:false,
         _id:req.body.userId
       });
@@ -135,6 +134,43 @@ router.post("/email-login", async (req, res, next) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
 
+  } catch (err) {
+    next(err, req, res, next);
+  }
+});
+router.post("/newUserUpdate", async (req, res, next) => {
+  try {
+    let user = mongooseConnections.model("eduUsers",usersSchema)
+
+    let isPro = req.body.isPro;
+    let toUpdate;
+    if (isShow == false) {
+      toUpdate = true;
+    } else {
+      toUpdate = false;
+    }
+    await user.updateOne(
+      {
+        _id: req.body.cardId,
+        "links.id": {
+          $eq: new mongoose.Types.ObjectId(isPro),
+        },
+      },
+      {
+        $set: {
+          "links.$.isPro": toUpdate,
+        },
+      },
+      {
+        $upsert: true,
+        $multi: true,
+      }
+    );
+
+    res.send({
+      status: "success",
+      message: "user updated successfully!",
+    });
   } catch (err) {
     next(err, req, res, next);
   }
