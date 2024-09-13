@@ -38,13 +38,6 @@ router.post("/updateUserDetails", async (req, res, next) => {
   try {
 
     let toUpdate = req.body;
-    // let newUpdate = { age: 12,
-    //   password:"213432",
-    //   mobile:"9012345678",
-    //   address:"Noida 59",
-    //   username:"newuser",
-    //   companyName:"Eduminds learning pvt ltd",}
-    // let cardId = "66d583c75eb836431c9612a7"
     await User.updateOne(
       {
         _id: req.body.cardId,
