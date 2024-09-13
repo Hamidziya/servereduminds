@@ -89,27 +89,49 @@ router.post("/deleteUser", async (req, res, next) => {
 
 router.post("/userLogin", async (req, res, next) => {
   try {
-    try {
-      const users = await User.find({
-        isDelete: false,
-        _id: req.body.userId
-      });
-      //console.log("Users found:", users);
+    const userId = req.body.userId;
 
-      res.status(200).send({
-        status: "success",
-        message: "Login Data!",
-        data: users
+    const users = await User.aggregate([
+      {
+        $match: {
+          isDelete: false,
+          _id: userId
+        }
+      },
+      {
+        $project: {
+          password: 0,
+        }
+      },
+      {
+        $limit: 1 
+      },
+      {
+        $sort:{
+          _id:1
+        }
+      }
+    ]);
+
+    if (users.length === 0) {
+      res.status(404).send({
+        status: "error",
+        message: "User not found",
       });
-    } catch (err) {
-      console.error('Error fetching users:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
+      return;
     }
 
+    res.status(200).send({
+      status: "success",
+      message: "Login Data!",
+      data: users
+    });
   } catch (err) {
-    next(err, req, res, next);
+    console.error('Error fetching users:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 router.post("/email-login-dummy", async (req, res, next) => {
   try {
@@ -133,7 +155,6 @@ router.post("/email-login-dummy", async (req, res, next) => {
       const newUser = new User(toSave);
       const savedUser = await newUser.save();
 
-      //res.status(201).json(savedUser);
 
       const users = await User.find({
         isDelete: false,
