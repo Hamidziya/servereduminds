@@ -38,6 +38,13 @@ router.post("/updateUserDetails", async (req, res, next) => {
   try {
 
     let toUpdate = req.body;
+    // let newUpdate = { age: 12,
+    //   password:"213432",
+    //   mobile:"9012345678",
+    //   address:"Noida 59",
+    //   username:"newuser",
+    //   companyName:"Eduminds learning pvt ltd",}
+    // let cardId = "66d583c75eb836431c9612a7"
     await User.updateOne(
       {
         _id: req.body.cardId,
@@ -111,7 +118,7 @@ router.post("/userLogin", async (req, res, next) => {
   }
 });
 
-router.post("/email-login", async (req, res, next) => {
+router.post("/email-login-dummy", async (req, res, next) => {
   try {
     try {
 
@@ -154,6 +161,55 @@ router.post("/email-login", async (req, res, next) => {
     next(err, req, res, next);
   }
 });
+
+router.post("/email-login", async (req, res, next) => {
+  try {
+    let toSave = req.body;
+
+    const existingUser = await User.aggregate([
+      {
+        $match: {
+          isDelete: false,
+          email: toSave.email
+        }
+      },
+      {
+        $limit: 1 
+      }
+    ]);
+
+    if (existingUser.length > 0) {
+      res.status(201).send({
+        status: "error",
+        message: "Email Already Exists!",
+      });
+      return;
+    }
+
+    const newUser = new User(toSave);
+    const savedUser = await newUser.save();
+
+    const userData = await User.aggregate([
+      {
+        $match: {
+          isDelete: false,
+          _id: savedUser._id
+        }
+      }
+    ]);
+
+    res.status(200).send({
+      status: "success",
+      message: "Email Login Data!",
+      data: userData
+    });
+
+  } catch (err) {
+    console.error('Error in email-login:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 router.post("/newUserUpdate", async (req, res, next) => {
   try {
     let user = mongooseConnections.model("eduUsers", usersSchema)
