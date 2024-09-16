@@ -133,7 +133,7 @@ router.post("/userLogin", async (req, res, next) => {
 });
 
 
-router.post("/email-login-dummy", async (req, res, next) => {
+router.post("/email-login-dummies", async (req, res, next) => {
   try {
     try {
 
