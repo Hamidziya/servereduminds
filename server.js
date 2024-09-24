@@ -1,8 +1,8 @@
 // server.js
 
-const express = require('express');
-const connectDB = require('./app/config/db');
-const userRoutes = require('./app/routes/userRoutes');
+const express = require("express");
+const connectDB = require("./app/config/db");
+const userRoutes = require("./app/routes/userRoutes");
 
 // Initialize Express application
 const app = express();
@@ -14,7 +14,10 @@ app.use(express.json());
 connectDB();
 
 // Use routes
-app.use('/api', userRoutes);
+app.use("/api", userRoutes);
+app.get("/", (req, res) => {
+  return res.json({ message: " holidays found" });
+});
 
 // Start the server
 const PORT = 3000;
