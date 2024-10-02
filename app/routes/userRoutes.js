@@ -1,25 +1,25 @@
 // routes/userRoutes.js
 
-const express = require('express');
-const User = require('../models/userModel');
+const express = require("express");
+const User = require("../models/userModel");
 
 // Create a router
 const router = express.Router();
 
 // GET route to fetch all users
-router.get('/users', async (req, res) => {
+router.get("/users", async (req, res) => {
   try {
     console.log("Fetching users from MongoDB...");
     const users = await User.find({ isDelete: false });
     console.log("Users found:", users);
     res.json(users);
   } catch (err) {
-    console.error('Error fetching users:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error fetching users:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-router.post('/userSignUp', async (req, res) => {
+router.post("/userSignUp", async (req, res) => {
   try {
     let toSave = req.body;
 
@@ -29,21 +29,20 @@ router.post('/userSignUp', async (req, res) => {
 
     res.status(201).json(savedUser);
   } catch (err) {
-    console.error('Error saving user:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error saving user:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 router.post("/updateUserDetails", async (req, res, next) => {
   try {
-
     let toUpdate = req.body;
     await User.updateOne(
       {
         _id: req.body.cardId,
       },
       {
-        $set: toUpdate
+        $set: toUpdate,
       },
       {
         $upsert: true,
@@ -62,7 +61,6 @@ router.post("/updateUserDetails", async (req, res, next) => {
 
 router.post("/deleteUser", async (req, res, next) => {
   try {
-
     await User.updateOne(
       {
         _id: req.body.cardId,
@@ -95,22 +93,22 @@ router.post("/userLogin", async (req, res, next) => {
       {
         $match: {
           isDelete: false,
-          _id: userId
-        }
+          _id: userId,
+        },
       },
       {
         $project: {
           password: 0,
-        }
+        },
       },
       {
-        $limit: 1 
+        $limit: 1,
       },
       {
-        $sort:{
-          _id:1
-        }
-      }
+        $sort: {
+          _id: 1,
+        },
+      },
     ]);
 
     if (users.length === 0) {
@@ -124,53 +122,49 @@ router.post("/userLogin", async (req, res, next) => {
     res.status(200).send({
       status: "success",
       message: "Login Data!",
-      data: users
+      data: users,
     });
   } catch (err) {
-    console.error('Error fetching users:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error fetching users:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 router.post("/email-login-dummies", async (req, res, next) => {
   try {
     try {
-
       let toSave = req.body;
 
       const exist = await User.find({
         isDelete: false,
-        email: toSave.email
+        email: toSave.email,
       });
 
       if (exist) {
         res.status(201).send({
           status: "error",
           message: "Email Already Exists!",
-        })
-        return
+        });
+        return;
       }
 
       const newUser = new User(toSave);
       const savedUser = await newUser.save();
 
-
       const users = await User.find({
         isDelete: false,
-        _id: savedUser._id
+        _id: savedUser._id,
       });
 
       res.status(200).send({
         status: "success",
         message: "Email Login Data!",
-        data: users
+        data: users,
       });
     } catch (err) {
-      console.error('Error fetching users:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error fetching users:", err);
+      res.status(500).json({ error: "Internal Server Error" });
     }
-
   } catch (err) {
     next(err, req, res, next);
   }
@@ -184,12 +178,12 @@ router.post("/email-login", async (req, res, next) => {
       {
         $match: {
           isDelete: false,
-          email: toSave.email
-        }
+          email: toSave.email,
+        },
       },
       {
-        $limit: 1 
-      }
+        $limit: 1,
+      },
     ]);
 
     if (existingUser.length > 0) {
@@ -207,26 +201,25 @@ router.post("/email-login", async (req, res, next) => {
       {
         $match: {
           isDelete: false,
-          _id: savedUser._id
-        }
-      }
+          _id: savedUser._id,
+        },
+      },
     ]);
 
     res.status(200).send({
       status: "success",
       message: "Email Login Data!",
-      data: userData
+      data: userData,
     });
-
   } catch (err) {
-    console.error('Error in email-login:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error in email-login:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 router.post("/newUserUpdate", async (req, res, next) => {
   try {
-    let user = mongooseConnections.model("eduUsers", usersSchema)
+    let user = mongooseConnections.model("eduUsers", usersSchema);
 
     let isPro = req.body.isPro;
     let toUpdate;
@@ -262,7 +255,6 @@ router.post("/newUserUpdate", async (req, res, next) => {
   }
 });
 
-
 router.post("/newLinkSettingData", async (req, res, next) => {
   try {
     let cardSetting = mongooseConnections.model(
@@ -281,9 +273,9 @@ router.post("/newLinkSettingData", async (req, res, next) => {
       {
         $addFields: {
           cardId: {
-            $toObjectId: cardId
-          }
-        }
+            $toObjectId: cardId,
+          },
+        },
       },
       {
         $lookup: {
@@ -297,7 +289,6 @@ router.post("/newLinkSettingData", async (req, res, next) => {
               $match: {
                 $expr: {
                   $eq: ["$_id", "$$id"],
-
                 },
                 isActive: true,
               },
@@ -449,7 +440,6 @@ router.post("/updateAppCredentials", async (req, res, next) => {
   }
 });
 
-
 router.post("/addNotificationNew", async function (req, res, next) {
   try {
     let group = mongooseConnections.model("contactGroup", groupSchema);
@@ -526,7 +516,6 @@ router.post("/addNotificationNew", async function (req, res, next) {
   }
 });
 
-
 router.post("/changeIsShowApp", async (req, res, next) => {
   try {
     let mycard = mongooseConnections.model("mycards", mycardSchema);
@@ -598,7 +587,6 @@ router.post("/getMyCardsLinkSetting", async (req, res, next) => {
               $match: {
                 $expr: {
                   $eq: ["$_id", "$$id"],
-
                 },
                 isActive: true,
               },
@@ -784,6 +772,31 @@ router.post("/addNotificationGroup", async function (req, res, next) {
       status: "error",
       message: "Internal server error.",
     });
+  }
+});
+
+router.post("/updateUserDetailsAll", async (req, res, next) => {
+  try {
+    let toUpdate = req.body;
+    await User.updateOne(
+      {
+        _id: req.body.cardId,
+      },
+      {
+        $set: toUpdate,
+      },
+      {
+        $upsert: true,
+        $multi: true,
+      }
+    );
+
+    res.status(200).send({
+      status: "success",
+      message: "user updated successfully!",
+    });
+  } catch (err) {
+    next(err, req, res, next);
   }
 });
 
